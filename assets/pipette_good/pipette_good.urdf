@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<robot name="pipette_good">
+  <joint name="PrismaticJoint" type="prismatic">
+    <origin xyz="0.0276701 0. 0. " rpy="0. 0. 0."/>
+    <parent link="root"/>
+    <child link="pipette_button_link"/>
+    <axis xyz="1. 0. 0."/>
+    <limit lower="-0.002" upper="0.00467" effort="10000000." velocity="0."/>
+  </joint>
+  <link name="pipette_button_link">
+    <inertial>
+      <origin xyz="-0.0006701 0. 0. " rpy="0. 0. 0."/>
+      <mass value="0.003"/>
+      <inertia ixx="0.0000001" ixy="0." ixz="-0." iyy="0.0000014" iyz="0." izz="0.0000013"/>
+    </inertial>
+    <visual>
+      <origin xyz="-0.0006701 0. 0. " rpy="0. 0. 0."/>
+      <geometry>
+        <mesh filename="meshes/pipette_button.obj" scale="1. 1. 1."/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="-0.0006701 0. 0. " rpy="0. 0. 0."/>
+      <geometry>
+        <mesh filename="meshes/pipette_button_acd.obj" scale="1. 1. 1."/>
+      </geometry>
+    </collision>
+  </link>
+  <link name="root">
+    <inertial>
+      <origin xyz="0. 0. 0." rpy="0. 0. 0."/>
+      <mass value="0.01"/>
+      <inertia ixx="0.0000001" ixy="0." ixz="-0." iyy="0.0000014" iyz="0." izz="0.0000013"/>
+    </inertial>
+    <visual>
+      <origin xyz="0. 0. 0." rpy="0. 0. 0."/>
+      <geometry>
+        <mesh filename="meshes/pipette_tip.obj" scale="1. 1. 1."/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0. 0. 0." rpy="0. 0. 0."/>
+      <geometry>
+        <mesh filename="meshes/pipette_tip_acd.obj" scale="1. 1. 1."/>
+      </geometry>
+    </collision>
+  </link>
+</robot>

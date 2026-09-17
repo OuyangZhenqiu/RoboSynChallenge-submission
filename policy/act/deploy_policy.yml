@@ -1,0 +1,40 @@
+# ACT Policy Evaluation Configuration
+# python scripts/eval_policy.py --config policy/act/deploy_policy.yml
+
+# ------------------------------------------------------------------
+# Basic experiment configuration (Each policy must be retained.)
+# ------------------------------------------------------------------
+policy_name: act
+task_name: null
+setting: null
+model_name: null
+seed: 0
+max_episodes: 20
+max_steps: 1000
+# headless true (2026-09-11 排查定案): false 走 X11/Xvfb 窗口渲染, env.step 中位 231ms
+# p90 4.3s (X 合成巨尾) = 1.5 步/s; true 离屏渲染 = 19.7 步/s (13×)。CUDA 上下文/
+# 前向计算经三臂探针证伪 (cuda_fwd 臂与 plain 同速)。视频录制/判据/种子流不受影响
+# (SmolVLA 线 headless:true 全程验证)。与 smolvla/deploy_policy.yml 对齐。
+headless: true
+pytorch_device: cuda
+filter_dataset_saving: true
+eval_video_log: true
+eval_video_obs_keys:
+  - cam_high
+  - cam_right_wrist
+  - cam_left_wrist
+eval_reset_sync_steps: 1
+
+# ------------------------------------------------------------------
+# ACT Policy parameters used by get_model()
+# ------------------------------------------------------------------
+checkpoint_path: null
+act_step: 10
+replan_steps: null
+temporal_ensemble_coeff: null
+state_obs_path: robot/qpos
+strict_action_dim: true
+image_key_map:
+  observation.images.cam_high: cam_high
+  observation.images.cam_right_wrist: cam_right_wrist
+  observation.images.cam_left_wrist: cam_left_wrist

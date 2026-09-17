@@ -1,0 +1,9 @@
+# checkpoint 走 Hugging Face, 不进 GitHub 仓库 (官方 FAQ: HF checkpoint URL 在提交表单单列)
+checkpoints/
+# 评估运行产物
+eval_result/
+.cache/
+outputs_smoke.log
+__pycache__/
+*.pyc
+.venv/

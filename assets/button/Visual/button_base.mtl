@@ -1,0 +1,8 @@
+# https://github.com/mikedh/trimesh
+
+newmtl button_base_mat
+Ka 0.04500000 0.15500000 0.18500000
+Kd 0.27000000 0.61000000 0.69000000
+Ks 0.03500000 0.04500000 0.05000000
+Ns 10.00000000
+illum 2
