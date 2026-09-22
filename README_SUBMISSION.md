@@ -1,4 +1,4 @@
-# RoboSynChallenge 提交包 v2 — 九任务双栈（ACT ×7 + SmolVLA ×2）
+# RoboSynChallenge 提交包 v2 — 十任务（自训九任务双栈 ACT ×7 + SmolVLA ×2；官方 ckpt 一任务）
 
 **官方提交口径（FAQ，2026-09-22 挖自站点 bundle `pages-app.js?v=20260909-submit-policy-route`）**：
 - 代码 = GitHub 私有库（可保持私有，邀官方评估账号 **robosynchallenge** 为协作者），必须含 `eval.sh` / `deploy_policy.yml` / `deploy_policy.py`
@@ -7,7 +7,9 @@
 - 截止 **2026-10-11 AoE**，可多次提交取最新
 - **无 Docker 要求**
 
-九任务全部为**自训模型**（官方发布数据 → 本地训练/评估），无官方发布 checkpoint。
+任务 1-9 全部为**自训模型**（官方发布数据 → 本地训练/评估）。任务 10（sample_loading）
+使用**官方发布 checkpoint**（如实标注，非自训）：本地双栈自训均为 0%（ACT 0/30、自训多任务
+SmolVLA 0/30），官方单任务 SmolVLA ckpt 本地复测 2/30=6.7%，取最高分者提交。
 
 ## 评估入口
 
@@ -16,6 +18,7 @@ bash eval.sh <task_name> <setting> [checkpoint_path] [gpu_id] [extra_opts...]
 # 例 (checkpoint 缺省 = checkpoints/<本任务默认名>, HF 下载后放同位置即可)
 bash eval.sh click_bell random
 bash eval.sh handle_basket random checkpoints/smolvla_s3_handle_basket_030000 0
+bash eval.sh sample_loading random  # 官方 ckpt, 默认名解析
 bash eval.sh items_handover clear checkpoints/act_items_speed3_mix_060000 0 --max_episodes 5
 ```
 
@@ -42,9 +45,10 @@ bash eval.sh items_handover clear checkpoints/act_items_speed3_mix_060000 0 --ma
 | 7 | drawer_open_place | ACT | `act_drawer_open_place_baseline_060000` | [link](https://huggingface.co/oyzq941353193/act_drawer_open_place_baseline_060000) | **60.0%** (官方 29%, +31pp; 现行判据重基线, 旧口径读数 50.0) |
 | 8 | handle_basket | SmolVLA | `smolvla_s3_handle_basket_030000` | [link](https://huggingface.co/oyzq941353193/smolvla_s3_handle_basket_030000) | **60.0%** (官方 SmolVLA 单任务 63.3) |
 | 9 | item_assembly | SmolVLA | `smolvla_v6_item_assembly_300000` | [link](https://huggingface.co/oyzq941353193/smolvla_v6_item_assembly_300000) | **40.0%** (官方 SmolVLA 40; 官方真机全员 0/20) |
+| 10 | sample_loading | SmolVLA (**official ckpt**) | `SmolVLA_sim_sample_loading` | [link](https://huggingface.co/RoboSynChallenge/SmolVLA_sim_sample_loading) | **6.7%** (官方发布 ckpt 本地复测 2/30, random/seed1000) |
 
-> 九任务均值 = **60.7%**（random 口径，2026-09-17 全行现行判据重基线）。sample_loading（第 10 任务）
-> 本地双栈均为 0%，不提交。
+> 任务 1-9 自训均值 = **60.7%**（random 口径，2026-09-17 全行现行判据重基线）。
+> 十任务含 sample_loading（官方 ckpt 6.7%）= **55.3%**。
 
 **训练配方**：
 - ACT 七任务统一：LeRobot ACT (lerobot 0.3.3)，60k steps，seed 1000，batch1+accum8（effective 8），
