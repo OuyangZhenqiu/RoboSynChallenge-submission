@@ -2,7 +2,7 @@
 
 **官方提交口径（FAQ，2026-09-22 挖自站点 bundle `pages-app.js?v=20260909-submit-policy-route`）**：
 - 代码 = GitHub 私有库（可保持私有，邀官方评估账号 **robosynchallenge** 为协作者），必须含 `eval.sh` / `deploy_policy.yml` / `deploy_policy.py`
-- **checkpoint = Hugging Face URL**（每任务一个，提交表单单列/README 列出），不进 Git 仓库
+- **checkpoint = Hugging Face URL**（提交表单填汇总 repo 总入口 `https://huggingface.co/oyzq941353193/robosyn-submission-v2`，十任务各占一个子目录，README 十行表同步列出），不进 Git 仓库
 - 提交 = 网站表单三字段（code URL / HF checkpoint URL / data source）
 - 截止 **2026-10-11 AoE**，可多次提交取最新
 - **无 Docker 要求**
@@ -36,16 +36,16 @@ bash eval.sh items_handover clear checkpoints/act_items_speed3_mix_060000 0 --ma
 
 | # | task | stack | checkpoint (local) | HF URL | random 成绩 (seed1000, 30ep) |
 |---|---|---|---|---|---|
-| 1 | click_bell | ACT | `act_click_bell_2k_dr_060000` | [link](https://huggingface.co/oyzq941353193/act_click_bell_2k_dr_060000) | **70.0%** (官方 ACT 基线 37%, +33pp) |
-| 2 | table_rearrangement | ACT | `act_table_rearrangement_baseline_060000` | [link](https://huggingface.co/oyzq941353193/act_table_rearrangement_baseline_060000) | **96.7%** (官方 63%; 三轮合并 91.1%) |
-| 3 | water_pouring | ACT | `act_water_pouring_baseline_060000` | [link](https://huggingface.co/oyzq941353193/act_water_pouring_baseline_060000) | **50.0%** (官方 72%) |
-| 4 | items_handover | ACT | `act_items_speed3_mix_060000` | [link](https://huggingface.co/oyzq941353193/act_items_speed3_mix_060000) | **56.7%** (rp25; 2026-09-17 现行判据重基线, 前读 53.3 噪声带内) |
-| 5 | manipulate_pipette | ACT | `act_manipulate_pipette_baseline_060000` | [link](https://huggingface.co/oyzq941353193/act_manipulate_pipette_baseline_060000) | **53.3%** (无官方 ACT 基线; 2026-09-17 逐位复现) |
-| 6 | mixer_operating | ACT | `act_mixer_operating_baseline_060000` | [link](https://huggingface.co/oyzq941353193/act_mixer_operating_baseline_060000) | **60.0%** (官方 77%; 2026-09-17 逐位复现) |
-| 7 | drawer_open_place | ACT | `act_drawer_open_place_baseline_060000` | [link](https://huggingface.co/oyzq941353193/act_drawer_open_place_baseline_060000) | **60.0%** (官方 29%, +31pp; 现行判据重基线, 旧口径读数 50.0) |
-| 8 | handle_basket | SmolVLA | `smolvla_s3_handle_basket_030000` | [link](https://huggingface.co/oyzq941353193/smolvla_s3_handle_basket_030000) | **60.0%** (官方 SmolVLA 单任务 63.3) |
-| 9 | item_assembly | SmolVLA | `smolvla_v6_item_assembly_300000` | [link](https://huggingface.co/oyzq941353193/smolvla_v6_item_assembly_300000) | **40.0%** (官方 SmolVLA 40; 官方真机全员 0/20) |
-| 10 | sample_loading | SmolVLA (**official ckpt**) | `SmolVLA_sim_sample_loading` | [link](https://huggingface.co/RoboSynChallenge/SmolVLA_sim_sample_loading) | **6.7%** (官方发布 ckpt 本地复测 2/30, random/seed1000) |
+| 1 | click_bell | ACT | `act_click_bell_2k_dr_060000` | [link](https://huggingface.co/oyzq941353193/robosyn-submission-v2/tree/main/act_click_bell_2k_dr_060000) | **70.0%** (官方 ACT 基线 37%, +33pp) |
+| 2 | table_rearrangement | ACT | `act_table_rearrangement_baseline_060000` | [link](https://huggingface.co/oyzq941353193/robosyn-submission-v2/tree/main/act_table_rearrangement_baseline_060000) | **96.7%** (官方 63%; 三轮合并 91.1%) |
+| 3 | water_pouring | ACT | `act_water_pouring_baseline_060000` | [link](https://huggingface.co/oyzq941353193/robosyn-submission-v2/tree/main/act_water_pouring_baseline_060000) | **50.0%** (官方 72%) |
+| 4 | items_handover | ACT | `act_items_speed3_mix_060000` | [link](https://huggingface.co/oyzq941353193/robosyn-submission-v2/tree/main/act_items_speed3_mix_060000) | **56.7%** (rp25; 2026-09-17 现行判据重基线, 前读 53.3 噪声带内) |
+| 5 | manipulate_pipette | ACT | `act_manipulate_pipette_baseline_060000` | [link](https://huggingface.co/oyzq941353193/robosyn-submission-v2/tree/main/act_manipulate_pipette_baseline_060000) | **53.3%** (无官方 ACT 基线; 2026-09-17 逐位复现) |
+| 6 | mixer_operating | ACT | `act_mixer_operating_baseline_060000` | [link](https://huggingface.co/oyzq941353193/robosyn-submission-v2/tree/main/act_mixer_operating_baseline_060000) | **60.0%** (官方 77%; 2026-09-17 逐位复现) |
+| 7 | drawer_open_place | ACT | `act_drawer_open_place_baseline_060000` | [link](https://huggingface.co/oyzq941353193/robosyn-submission-v2/tree/main/act_drawer_open_place_baseline_060000) | **60.0%** (官方 29%, +31pp; 现行判据重基线, 旧口径读数 50.0) |
+| 8 | handle_basket | SmolVLA | `smolvla_s3_handle_basket_030000` | [link](https://huggingface.co/oyzq941353193/robosyn-submission-v2/tree/main/smolvla_s3_handle_basket_030000) | **60.0%** (官方 SmolVLA 单任务 63.3) |
+| 9 | item_assembly | SmolVLA | `smolvla_v6_item_assembly_300000` | [link](https://huggingface.co/oyzq941353193/robosyn-submission-v2/tree/main/smolvla_v6_item_assembly_300000) | **40.0%** (官方 SmolVLA 40; 官方真机全员 0/20) |
+| 10 | sample_loading | SmolVLA (**official ckpt**) | `SmolVLA_sim_sample_loading` | [link](https://huggingface.co/oyzq941353193/robosyn-submission-v2/tree/main/SmolVLA_sim_sample_loading) (mirrored from official) | **6.7%** (官方发布 ckpt 本地复测 2/30, random/seed1000) |
 
 > 任务 1-9 自训均值 = **60.7%**（random 口径，2026-09-17 全行现行判据重基线）。
 > 十任务含 sample_loading（官方 ckpt 6.7%）= **55.3%**。
