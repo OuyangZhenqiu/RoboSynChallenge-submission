@@ -1,7 +1,7 @@
 # RoboSynChallenge 提交包 v2 — 九任务双栈（ACT ×7 + SmolVLA ×2）
 
-**官方提交口径（FAQ，2026-08-28 挖自站点 bundle）**：
-- 代码 = GitHub 私有库（可保持私有，邀 **EDEM-AI** 协作者），必须含 `eval.sh` / `deploy_policy.yml` / `deploy_policy.py`
+**官方提交口径（FAQ，2026-09-22 挖自站点 bundle `pages-app.js?v=20260909-submit-policy-route`）**：
+- 代码 = GitHub 私有库（可保持私有，邀官方评估账号 **robosynchallenge** 为协作者），必须含 `eval.sh` / `deploy_policy.yml` / `deploy_policy.py`
 - **checkpoint = Hugging Face URL**（每任务一个，提交表单单列/README 列出），不进 Git 仓库
 - 提交 = 网站表单三字段（code URL / HF checkpoint URL / data source）
 - 截止 **2026-10-11 AoE**，可多次提交取最新
