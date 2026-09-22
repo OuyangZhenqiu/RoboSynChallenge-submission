@@ -82,7 +82,9 @@ bash eval.sh items_handover clear checkpoints/act_items_speed3_mix_060000 0 --ma
 - ACT 栈：`pip install -e policy/act`（或按 `pyproject.toml`：lerobot 0.3.3 系、einops、pyav 等）；
   eval 进程 Python 需含 EmbodiChain 依赖（open3d 等——官方环境自带；可用 `PYTHON_BIN` 指定解释器）
 - SmolVLA 栈：`pip install -e policy/smolvla/lerobot`（或 `PYTHONPATH=policy/smolvla/lerobot/src`；
-  eval.sh 自动探测包内 fork）
+  eval.sh 自动探测包内 fork）。**注意**：SmolVLA worker 进程需 **Python ≥3.12**（fork 用 PEP 695
+  type 语法，3.11 会 SyntaxError）——eval 主进程 python 为 3.11 时须
+  `export SMOLVLA_PYTHON=<py312 解释器（含 lerobot 依赖）>`
 - EmbodiChain（官方环境已含；`EMBODICHAIN_ROOT` 可覆盖路径）
 - 评估默认 `headless: true` 离屏渲染，无需 X display；如需真窗口渲染传 `--headless false`
 
