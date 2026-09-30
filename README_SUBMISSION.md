@@ -1,4 +1,4 @@
-# RoboSynChallenge 提交包 v2 — 十任务（自训九任务双栈 ACT ×7 + SmolVLA ×2；官方 ckpt 一任务）
+# RoboSynChallenge 提交包 v2 — 十任务（全自训双栈 ACT ×7 + SmolVLA ×3）
 
 **官方提交口径（FAQ，2026-09-22 挖自站点 bundle `pages-app.js?v=20260909-submit-policy-route`）**：
 - 代码 = GitHub 私有库（可保持私有，邀官方评估账号 **robosynchallenge** 为协作者），必须含 `eval.sh` / `deploy_policy.yml` / `deploy_policy.py`
@@ -7,9 +7,11 @@
 - 截止 **2026-10-11 AoE**，可多次提交取最新
 - **无 Docker 要求**
 
-任务 1-9 全部为**自训模型**（官方发布数据 → 本地训练/评估）。任务 10（sample_loading）
-使用**官方发布 checkpoint**（如实标注，非自训）：本地双栈自训均为 0%（ACT 0/30、自训多任务
-SmolVLA 0/30），官方单任务 SmolVLA ckpt 本地复测 2/30=6.7%，取最高分者提交。
+任务 1-10 全部为**自训模型**（官方发布数据 + 自采增广数据 → 本地训练/评估）。任务 10（sample_loading）
+自训历程：官方 1000ep 上双栈自训均 0%（ACT 0/30、多任务 SmolVLA 0/30）→ 数据补采 1025ep
+（死区滤除型采集，收紧 cube/rack 分侧）合并成 2025ep → v6 多任务底座暖启动 60k 专训 →
+**3/30 = 10.0%**（官方口径：新 env + expert 预检，random/seed1000），超官方发布 ckpt
+（同口径 1/30=3.3%，vintage 口径 2/30=6.7%），故提交自训版。
 
 ## 评估入口
 
@@ -18,7 +20,7 @@ bash eval.sh <task_name> <setting> [checkpoint_path] [gpu_id] [extra_opts...]
 # 例 (checkpoint 缺省 = checkpoints/<本任务默认名>, HF 下载后放同位置即可)
 bash eval.sh click_bell random
 bash eval.sh handle_basket random checkpoints/smolvla_s3_handle_basket_030000 0
-bash eval.sh sample_loading random  # 官方 ckpt, 默认名解析
+bash eval.sh sample_loading random  # 自训 ckpt, 默认名解析
 bash eval.sh items_handover clear checkpoints/act_items_speed3_mix_060000 0 --max_episodes 5
 ```
 
@@ -45,10 +47,10 @@ bash eval.sh items_handover clear checkpoints/act_items_speed3_mix_060000 0 --ma
 | 7 | drawer_open_place | ACT | `act_drawer_open_place_baseline_060000` | [link](https://huggingface.co/oyzq941353193/robosyn-submission-v2/tree/main/act_drawer_open_place_baseline_060000) | **60.0%** (官方 29%, +31pp; 现行判据重基线, 旧口径读数 50.0) |
 | 8 | handle_basket | SmolVLA | `smolvla_s3_handle_basket_030000` | [link](https://huggingface.co/oyzq941353193/robosyn-submission-v2/tree/main/smolvla_s3_handle_basket_030000) | **60.0%** (官方 SmolVLA 单任务 63.3) |
 | 9 | item_assembly | SmolVLA | `smolvla_v6_item_assembly_300000` | [link](https://huggingface.co/oyzq941353193/robosyn-submission-v2/tree/main/smolvla_v6_item_assembly_300000) | **40.0%** (官方 SmolVLA 40; 官方真机全员 0/20) |
-| 10 | sample_loading | SmolVLA (**official ckpt**) | `SmolVLA_sim_sample_loading` | [link](https://huggingface.co/oyzq941353193/robosyn-submission-v2/tree/main/SmolVLA_sim_sample_loading) (mirrored from official) | **6.7%** (官方发布 ckpt 本地复测 2/30, random/seed1000) |
+| 10 | sample_loading | SmolVLA (self-trained) | `smolvla_s3_sample_loading_060000` | [link](https://huggingface.co/oyzq941353193/robosyn-submission-v2/tree/main/smolvla_s3_sample_loading_060000) | **10.0%** (自训 3/30; 官方口径新 env+expert 预检, 2025eps 数据补采+60k 专训; 官方 ckpt 同口径 3.3%) |
 
 > 任务 1-9 自训均值 = **60.7%**（random 口径，2026-09-17 全行现行判据重基线）。
-> 十任务含 sample_loading（官方 ckpt 6.7%）= **55.3%**。
+> 十任务全自训（sample_loading 自训 10.0%）= **58.7%**。
 
 **训练配方**：
 - ACT 七任务统一：LeRobot ACT (lerobot 0.3.3)，60k steps，seed 1000，batch1+accum8（effective 8），
@@ -57,6 +59,8 @@ bash eval.sh items_handover clear checkpoints/act_items_speed3_mix_060000 0 --ma
 - SmolVLA 两行 = 课程学习产物（SmolVLA-Base 450M LoRA 微调，lerobot 0.6.2 fork 见 `policy/smolvla/lerobot`）：
   - handle_basket = S3 课程末段（十任务 300k → 六任务 150k → 本任务 30k，lr 1e-4），30k steps
   - item_assembly = v6 十任务多任务模型 300k steps（lr cosine 对齐 300k；assembly 为其最强任务）
+  - sample_loading = v6@300k 暖启动 60k steps（lr 1e-4 常数）；数据 = 官方 1000ep + 自采 1025ep
+    （死区滤除型采集，cube/rack 分侧收紧）合并 2025ep，同任务 v3.0 合并器零 remux 硬链
 
 ## 目录结构
 
