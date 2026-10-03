@@ -132,6 +132,31 @@ def encode_action(
     return action_tensor.unsqueeze(0)
 
 
+def _preflight_worker_python(python_bin: str) -> None:
+    """worker 解释器版本预检: lerobot io_utils.py 用 PEP 695 泛型语法, 需 py>=3.12。
+
+    历史坑 (9/22 首犯, 10/2 复犯): 四件套未导出时 python_bin 回落 sys.executable
+    (EmbodiChain py3.11) → worker 启动即死于 SyntaxError → 主进程后续 RPC 才
+    BrokenPipe, 尸体远在日志中段。此处换成即刻、可自解释的失败。
+    """
+    try:
+        out = subprocess.run(
+            [python_bin, "-c", "import sys; print(sys.version_info >= (3, 12))"],
+            capture_output=True,
+            text=True,
+            timeout=60,
+        )
+        ok = out.returncode == 0 and out.stdout.strip() == "True"
+    except (OSError, subprocess.TimeoutExpired):
+        ok = False
+    if not ok:
+        raise SystemExit(
+            f"❌ SmolVLA worker 解释器不满足 py>=3.12 (PEP 695): {python_bin}\n"
+            f"   解法: export SMOLVLA_PYTHON=/home/oyzq/workshop/research/libero-act-project/.venv/bin/python\n"
+            f"   四件套其余: SMOLVLA_LEROBOT_ROOT=<repo>/policy/smolvla/lerobot + HF_HUB_OFFLINE=1 + 代理 unset"
+        )
+
+
 class SmolVLAWorkerClient:
     def __init__(self, usr_args: dict):
         policy_root = Path(__file__).resolve().parent
@@ -144,6 +169,7 @@ class SmolVLAWorkerClient:
         )
         self.lerobot_root = Path(lerobot_root).expanduser().resolve() if lerobot_root else None
         self.python_bin = usr_args.get("smolvla_python") or os.environ.get("SMOLVLA_PYTHON") or sys.executable
+        _preflight_worker_python(self.python_bin)
         self.device = usr_args.get("pytorch_device", "cuda")
         self.smolvla_steps = int(usr_args.get("smolvla_steps", 10))
         self.gripper_indices = tuple(int(idx) for idx in usr_args.get("smolvla_gripper_indices", [6, 13]))
@@ -273,9 +299,14 @@ class SmolVLAWorkerClient:
 
         return [np.asarray(action, dtype=np.float32) for action in response["actions"]]
 
-    def reset(self) -> None:
+    def reset(self, episode_seed: int | None = None) -> None:
         self._debug_chunks_printed = 0
-        self._rpc({"cmd": "reset"})
+        payload = {"cmd": "reset"}
+        if episode_seed is not None:
+            # 评估确定性 (2026-10-01): 把集种子种进 worker 的 RNG (流匹配头
+            # 每 chunk 的 torch.randn 从此确定), 见 smolvla_worker.py reset 分支。
+            payload["seed"] = int(episode_seed)
+        self._rpc(payload)
 
     def maybe_print_action_debug(self, actions: list[np.ndarray]) -> None:
         if not self.debug_actions or self._debug_chunks_printed >= self.debug_action_chunks:
@@ -340,6 +371,11 @@ def get_model(usr_args):
 
 def eval(env, model, obs):
     instruction = getattr(env, "_current_instruction", None) or "click the bell"
+    # RECAP-lite 推理侧 token 注入 (2026-09-30): ROBOSYN_ADV_TOKEN=good|bad 时拼在
+    # 指令尾, 与训练侧 task string 改写同构。不设环境变量 = 行为与原先逐字节一致。
+    adv_token = os.environ.get("ROBOSYN_ADV_TOKEN", "").strip()
+    if adv_token:
+        instruction = f"{instruction} {adv_token}"
     encoded_obs = encode_obs(obs, image_keys=model.image_keys)
     # 上游 4 元组签名 (259d1bb, 2026-09-01 合并): 末位为每次模型推理的耗时列表。
     # 计时用纯墙钟 (device=None): worker 是独立进程, 本进程的 cuda sync 管不到它;
@@ -369,8 +405,9 @@ def eval(env, model, obs):
     return final_obs, info, truncated, inference_times_s
 
 
-def reset_model(model):
-    model.reset()
+def reset_model(model, episode_seed=None):
+    # episode_seed (2026-10-01): 驱动端传集种子, 种进 worker RNG 恢复评估确定性。
+    model.reset(episode_seed)
 
 
 def close_model(model):

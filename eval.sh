@@ -12,7 +12,8 @@
 #   - items_handover (ACT):  追加 --replan_steps 25 (速度混训模型 + 中频重规划, 提交锁定配置)
 #   - item_assembly (SmolVLA): 导出 ROBOSYN_ASSEMBLY_NO_WELD=1 (attach 后 weld 物理步
 #     SIGSEGV 的官方 env 逃生门, 判据纯几何不受影响)
-#   - sample_loading (SmolVLA): 自训 ckpt (官方1000+自采1025eps 合并 2025eps, 60k 专训), 默认配置直跑
+#   - sample_loading (SmolVLA): AWR 优势加权 ckpt (s3-2025eps 60k 暖启动 + AWR 集级复制 24k,
+#     13/90=14.4% 三把合并), 默认配置直跑
 # checkpoint 缺省 = checkpoints/<本任务默认名> (HF 下载后放同位置即可复现命令行)
 # ----------------------------------------------------------------------------
 set -euo pipefail
@@ -36,7 +37,7 @@ ROWS=(
   "drawer_open_place|act|act_drawer_open_place_baseline_060000"
   "handle_basket|smolvla|smolvla_s3_handle_basket_030000"
   "item_assembly|smolvla|smolvla_v6_item_assembly_300000"
-  "sample_loading|smolvla|smolvla_s3_sample_loading_060000"
+  "sample_loading|smolvla|smolvla_awr_sample_loading_024000"
 )
 STACK=""; DEFAULT_CKPT=""
 for ROW in "${ROWS[@]}"; do

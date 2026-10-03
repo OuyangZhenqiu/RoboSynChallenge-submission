@@ -38,6 +38,15 @@ for i in "${!EXTRA_ARGS[@]}"; do
     esac
 done
 
+# SmolVLA worker 解释器默认值 (10/2 坑根治第二层): worker 里的 lerobot 用 PEP 695
+# 泛型语法需 py>=3.12, 未导 SMOLVLA_PYTHON 时此前回落 eval 主进程 (EmbodiChain
+# py3.11) → worker SyntaxError → BrokenPipe。默认指向本机已知 3.13 venv;显式
+# 导出永远优先;若默认候选也不在,保持原行为由 deploy_policy.py 版本预检兜底拦截。
+if [[ -z "${SMOLVLA_PYTHON:-}" ]]; then
+    _DEFAULT_SMOLVLA_PY="$WORKSPACE_ROOT/libero-act-project/.venv/bin/python"
+    [[ -x "$_DEFAULT_SMOLVLA_PY" ]] && export SMOLVLA_PYTHON="$_DEFAULT_SMOLVLA_PY"
+    unset _DEFAULT_SMOLVLA_PY
+fi
 if [[ -n "${SMOLVLA_PYTHON:-}" ]]; then
     EXTRA_ARGS+=(--smolvla_python "$SMOLVLA_PYTHON")
 fi

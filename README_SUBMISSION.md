@@ -10,8 +10,9 @@
 任务 1-10 全部为**自训模型**（官方发布数据 + 自采增广数据 → 本地训练/评估）。任务 10（sample_loading）
 自训历程：官方 1000ep 上双栈自训均 0%（ACT 0/30、多任务 SmolVLA 0/30）→ 数据补采 1025ep
 （死区滤除型采集，收紧 cube/rack 分侧）合并成 2025ep → v6 多任务底座暖启动 60k 专训 →
-**3/30 = 10.0%**（官方口径：新 env + expert 预检，random/seed1000），超官方发布 ckpt
-（同口径 1/30=3.3%，vintage 口径 2/30=6.7%），故提交自训版。
+3/30 = 10.0%（超官方发布 ckpt 同口径 3.3%）→ **AWR 优势加权二轮**（该 60k 模型暖启动，
+混入 160ep on-policy rollout 集级优势复制增广再训 24k）→ **13/90 = 14.4%**
+（三把 30ep 合并：seed1000 7/30+2/30、seed2000 4/30），提交 AWR 版。
 
 ## 评估入口
 
@@ -47,10 +48,11 @@ bash eval.sh items_handover clear checkpoints/act_items_speed3_mix_060000 0 --ma
 | 7 | drawer_open_place | ACT | `act_drawer_open_place_baseline_060000` | [link](https://huggingface.co/oyzq941353193/robosyn-submission-v2/tree/main/act_drawer_open_place_baseline_060000) | **60.0%** (官方 29%, +31pp; 现行判据重基线, 旧口径读数 50.0) |
 | 8 | handle_basket | SmolVLA | `smolvla_s3_handle_basket_030000` | [link](https://huggingface.co/oyzq941353193/robosyn-submission-v2/tree/main/smolvla_s3_handle_basket_030000) | **60.0%** (官方 SmolVLA 单任务 63.3) |
 | 9 | item_assembly | SmolVLA | `smolvla_v6_item_assembly_300000` | [link](https://huggingface.co/oyzq941353193/robosyn-submission-v2/tree/main/smolvla_v6_item_assembly_300000) | **40.0%** (官方 SmolVLA 40; 官方真机全员 0/20) |
-| 10 | sample_loading | SmolVLA (self-trained) | `smolvla_s3_sample_loading_060000` | [link](https://huggingface.co/oyzq941353193/robosyn-submission-v2/tree/main/smolvla_s3_sample_loading_060000) | **10.0%** (自训 3/30; 官方口径新 env+expert 预检, 2025eps 数据补采+60k 专训; 官方 ckpt 同口径 3.3%) |
+| 10 | sample_loading | SmolVLA (self-trained) | `smolvla_awr_sample_loading_024000` | [link](https://huggingface.co/oyzq941353193/robosyn-submission-v2/tree/main/smolvla_awr_sample_loading_024000) | **14.4%** (13/90 三把合并: seed1000 7+2/30, seed2000 4/30; AWR 二轮=s3-10.0% 暖启动+on-policy 增广 24k; 官方 ckpt 同口径 3.3%) |
 
 > 任务 1-9 自训均值 = **60.7%**（random 口径，2026-09-17 全行现行判据重基线）。
-> 十任务全自训（sample_loading 自训 10.0%）= **58.7%**。
+> 十任务全自训（sample_loading = AWR 版 14.4% 三把合并口径）= **56.1%**（九行合计
+> 546.7 + 14.4；9/30 版本页曾误记 58.7，本版起修正）。
 
 **训练配方**：
 - ACT 七任务统一：LeRobot ACT (lerobot 0.3.3)，60k steps，seed 1000，batch1+accum8（effective 8），
@@ -59,8 +61,9 @@ bash eval.sh items_handover clear checkpoints/act_items_speed3_mix_060000 0 --ma
 - SmolVLA 两行 = 课程学习产物（SmolVLA-Base 450M LoRA 微调，lerobot 0.6.2 fork 见 `policy/smolvla/lerobot`）：
   - handle_basket = S3 课程末段（十任务 300k → 六任务 150k → 本任务 30k，lr 1e-4），30k steps
   - item_assembly = v6 十任务多任务模型 300k steps（lr cosine 对齐 300k；assembly 为其最强任务）
-  - sample_loading = v6@300k 暖启动 60k steps（lr 1e-4 常数）；数据 = 官方 1000ep + 自采 1025ep
-    （死区滤除型采集，cube/rack 分侧收紧）合并 2025ep，同任务 v3.0 合并器零 remux 硬链
+  - sample_loading = 两段：①v6@300k 暖启动 60k steps（lr 1e-4 常数），数据 = 官方 1000ep +
+    自采 1025ep（死区滤除型采集，cube/rack 分侧收紧）合并 2025ep，同任务 v3.0 合并器零 remux 硬链；
+    ②该 60k 模型暖启动 AWR 集级优势复制 24k steps（good×9/bad×3 复制展开 582eps 增广混底，lr 同锚）
 
 ## 目录结构
 
@@ -99,5 +102,7 @@ bash eval.sh items_handover clear checkpoints/act_items_speed3_mix_060000 0 --ma
 - table_rearrangement 外观轴逐轮重抽，三轮读数 93.3/83.3/96.7，表中引单轮最高与合并值
 - drawer_open_place clear 6.6% 与 random 50% 倒挂：机制已归因（clear 固定初始 qpos 落策略退化流形），
   以 random 口径为准
+- sample_loading 14.4% 为三把 30ep 合并口径（其余任务为单把 seed1000/30ep）：该任务栈单把散布大
+  （sim ε 翻转骑界集，同模型同 seed 双把可差 5 集），合并值为无偏估计；单把区间 6.7-23.3%
 - item_assembly 评估必须带 `ROBOSYN_ASSEMBLY_NO_WELD=1`（root eval.sh 已内置）：attach 成功后建 weld
   的物理步有 SIGSEGV 潜伏 bug，不带会静默吃掉全部成功集记 0 分；判据纯几何，无虚高

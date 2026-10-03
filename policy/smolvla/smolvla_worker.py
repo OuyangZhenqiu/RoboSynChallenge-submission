@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import contextlib
 import json
+import random
 import sys
 from pathlib import Path
 
@@ -95,6 +96,20 @@ def main() -> int:
         try:
             if cmd == "reset":
                 policy.reset()
+                # 评估确定性 (2026-10-01): 流匹配头每个动作块要 torch.randn 采一次
+                # 初始噪声, 而本 worker 从不种 RNG (噪声源=OS 熵) → 同 ckpt 同
+                # seed 两把翻转 37% (11/30 vs 8/30, σ≈2.6 集)。驱动端现在每集经
+                # reset RPC 把 ep_seed 传进来, 与环境层 prepare_episode_reset 同构
+                # — SmolVLA 评估从此逐位可复现 (ACT 同款待遇)。seed 缺席时行为
+                # 与原先逐字节一致 (不种)。
+                seed = request.get("seed")
+                if seed is not None:
+                    seed = int(seed)
+                    random.seed(seed)
+                    np.random.seed(seed % (2**32))
+                    torch.manual_seed(seed)
+                    torch.cuda.manual_seed_all(seed)
+                    print(f"[smolvla_worker] episode rng seeded to {seed}", file=sys.stderr, flush=True)
                 _send({"ok": True})
                 continue
 
