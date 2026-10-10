@@ -35,7 +35,7 @@ ROWS=(
   "manipulate_pipette|act|act_manipulate_pipette_baseline_060000"
   "mixer_operating|act|act_mixer_operating_baseline_060000"
   "drawer_open_place|act|act_drawer_open_place_baseline_060000"
-  "handle_basket|smolvla|smolvla_s3_handle_basket_030000"
+  "handle_basket|smolvla|smolvla_basket_ft_cont_100000"
   "item_assembly|smolvla|smolvla_v6_item_assembly_300000"
   "sample_loading|smolvla|smolvla_awr_sample_loading_024000"
 )
